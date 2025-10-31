@@ -1,0 +1,47 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+import joblib
+
+
+data = {
+    'Weather': [0, 1, 2, 0, 1],
+    'Road_Type': [0, 1, 1, 0, 0],
+    'Speed_Limit': [30, 50, 80, 40, 60],
+    'Accident_Severity': [1, 2, 3, 1, 2]
+}
+
+df = pd.DataFrame(data)
+df.to_csv('synthetic_accidents.csv', index=False)
+print("Sample dataset created!")
+
+df = pd.read_csv('synthetic_accidents.csv')
+
+df.rename(columns={
+    'Weather': 'Weather_Condition_Kenya',
+    'Road_Type': 'Road_Surface_Kenya',
+    'Speed_Limit': 'Speed_KPH'
+}, inplace=True)
+
+df.head()
+
+X = df[['Weather_Condition_Kenya', 'Road_Surface_Kenya', 'Speed_KPH']]
+y = df['Accident_Severity']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+joblib.dump(model, 'kenya_accident_model.pkl')
+
+example = pd.DataFrame([{
+    'Weather_Condition_Kenya': 2,  # Foggy
+    'Road_Surface_Kenya': 1,       # Wet
+    'Speed_KPH': 80
+}])
+
+prediction = model.predict(example)
+print("Predicted Accident Severity:", prediction[0])
+
+
